@@ -1,0 +1,39 @@
+Q: năm 2022 có bao nhiêu sinh viên nữ nhập học
+Cypher: MATCH (s:Student) WHERE s.namNhapHoc = 2022 AND toLower(s.gioiTinh) CONTAINS "nữ" RETURN COUNT(*) AS soLuong
+Columns: ["soLuong"]
+Sheet: student
+
+Q: năm 2022 có bao nhiêu sinh viên nam nhập học
+Cypher: MATCH (s:Student) WHERE s.namNhapHoc = 2022 AND toLower(s.gioiTinh) CONTAINS "nam" RETURN COUNT(*) AS soLuong
+Columns: ["soLuong"]
+Sheet: student
+
+Q: số lượng sinh viên khoa CNTT theo năm nhập học
+Cypher: MATCH (s:Student)-[:BELONGS_TO]->(d:Department) WHERE toLower(d.tenKhoa) CONTAINS "cntt" RETURN s.namNhapHoc AS namNhapHoc, COUNT(*) AS soLuong ORDER BY namNhapHoc
+Columns: ["namNhapHoc","soLuong"]
+Sheet: student
+
+Q: điểm trung bình theo học kỳ năm 2023
+Cypher: MATCH (r:AcademicRecord) WHERE r.namHoc CONTAINS "2023" RETURN r.hocKy AS hocKy, avg(r.diemTongKet) AS diemTB ORDER BY hocKy
+Columns: ["hocKy","diemTB"]
+Sheet: academic
+
+Q: có bao nhiêu sinh viên trượt môn học
+Cypher: MATCH (r:AcademicRecord) WHERE toLower(r.ketQua) CONTAINS "không đạt" RETURN COUNT(*) AS soLuong
+Columns: ["soLuong"]
+Sheet: academic
+
+Q: số lượng sinh viên không đạt học phần HP035
+Cypher: MATCH (r:AcademicRecord) WHERE r.maHocPhan = "HP035" AND toLower(r.ketQua) CONTAINS "không đạt" RETURN COUNT(*) AS soLuong
+Columns: ["soLuong"]
+Sheet: academic
+
+Q: số lượng sinh viên qua môn học phần HP035
+Cypher: MATCH (r:AcademicRecord) WHERE r.maHocPhan = "HP035" AND toLower(r.ketQua) CONTAINS "đạt" RETURN COUNT(*) AS soLuong
+Columns: ["soLuong"]
+Sheet: academic
+
+Q: danh sách giảng viên khoa kinh tế
+Cypher: MATCH (l:Lecturer)-[:IN_DEPARTMENT]->(d:Department) WHERE toLower(d.tenKhoa) CONTAINS "kinh tế" RETURN l.maGiangVien AS maGiangVien, l.hoTen AS hoTen, l.chucDanh AS chucDanh
+Columns: ["maGiangVien","hoTen","chucDanh"]
+Sheet: lecturer

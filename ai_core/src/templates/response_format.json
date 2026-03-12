@@ -1,0 +1,28 @@
+{
+  "type": "json_schema",
+  "json_schema": {
+    "name": "cypher_plan",
+    "strict": true,
+    "schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["data"]
+        },
+        "cypher": { "type": "string" },
+        "columns": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "sheet": {
+          "type": "string",
+          "enum": ["student", "course", "lecturer", "academic"]
+        },
+        "notes": { "type": "string" }
+      },
+      "required": ["mode", "cypher", "columns", "sheet", "notes"]
+    }
+  }
+}

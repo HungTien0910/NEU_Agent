@@ -1,0 +1,51 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+.venv/
+venv/
+env/
+
+# Node / Nuxt
+node_modules/
+.nuxt/
+.output/
+dist/
+.npm/
+*.tsbuildinfo
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+!.env.sample
+
+# Logs / runtime artifacts
+*.log
+nohup/*.log
+*.pid
+*.pid.lock
+
+# Docker local volumes (runtime DB data)
+data/postgres/
+data/neo4j/
+data/neo4j_logs/
+data/redis/
+
+docs/
+data/
+figma_redesign/
+nohup/
