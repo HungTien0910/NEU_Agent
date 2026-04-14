@@ -3,10 +3,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "nuxt dev --port 3003",
+    "dev": "nuxt dev --port 3004",
     "build": "nuxt build",
     "start": "node .output/server/index.mjs",
-    "preview": "nuxt preview --port 3003"
+    "preview": "nuxt preview --port 3004"
   },
   "dependencies": {
     "nuxt": "^3.10.0"

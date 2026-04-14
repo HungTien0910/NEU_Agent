@@ -75,7 +75,7 @@ services:
       smtp_from_name: ${SMTP_FROM_NAME:-NEU Data Query System}
       smtp_use_tls: ${SMTP_USE_TLS:-true}
       smtp_use_ssl: ${SMTP_USE_SSL:-false}
-      frontend_base_url: ${FRONTEND_BASE_URL:-http://localhost:3003}
+      frontend_base_url: ${FRONTEND_BASE_URL:-http://localhost:3004}
     depends_on:
       postgres:
         condition: service_healthy
