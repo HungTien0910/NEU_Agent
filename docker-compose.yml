@@ -91,7 +91,7 @@ services:
     container_name: neu_frontend
     restart: unless-stopped
     ports:
-      - "3003:3003"
+      - "3004:3004"
     environment:
       NUXT_PUBLIC_API_BASE: ${NUXT_PUBLIC_API_BASE:-http://localhost:1111}
     depends_on:
