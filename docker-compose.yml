@@ -2,6 +2,7 @@ services:
   postgres:
     image: postgres:16
     container_name: neu_postgres
+    restart: unless-stopped
     ports:
       - "55432:5432"
     environment:
@@ -19,10 +20,11 @@ services:
   neo4j:
     image: neo4j:5.19
     container_name: neu_neo4j
+    restart: unless-stopped
     ports:
-      - "17474:7474"  # HTTP
-      - "17473:7473"  # HTTPS
-      - "17687:7687"  # Bolt
+      - "17474:7474"
+      - "17473:7473"
+      - "17687:7687"
     environment:
       NEO4J_AUTH: "neo4j/neo4j_pass"
     volumes:
@@ -37,6 +39,7 @@ services:
   redis:
     image: redis:7.4
     container_name: neu_redis
+    restart: unless-stopped
     ports:
       - "16379:6379"
     command: ["redis-server", "--appendonly", "yes"]
@@ -47,3 +50,50 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: neu_backend
+    restart: unless-stopped
+    ports:
+      - "1111:1111"
+    environment:
+      pg_dsn: postgresql+psycopg2://neu_user:neu_pass@postgres:5432/neu
+      neo4j_uri: bolt://neo4j:7687
+      neo4j_user: neo4j
+      neo4j_password: neo4j_pass
+      redis_url: redis://redis:6379/0
+      openai_api_key: ${OPENAI_API_KEY:-}
+      openai_model: ${OPENAI_MODEL:-gpt-4o}
+      smtp_host: ${SMTP_HOST:-}
+      smtp_port: ${SMTP_PORT:-587}
+      smtp_user: ${SMTP_USER:-}
+      smtp_password: ${SMTP_PASSWORD:-}
+      smtp_from_email: ${SMTP_FROM_EMAIL:-}
+      smtp_from_name: ${SMTP_FROM_NAME:-NEU Data Query System}
+      smtp_use_tls: ${SMTP_USE_TLS:-true}
+      smtp_use_ssl: ${SMTP_USE_SSL:-false}
+      frontend_base_url: ${FRONTEND_BASE_URL:-http://localhost:3003}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: neu_frontend
+    restart: unless-stopped
+    ports:
+      - "3003:3003"
+    environment:
+      NUXT_PUBLIC_API_BASE: ${NUXT_PUBLIC_API_BASE:-http://localhost:1111}
+    depends_on:
+      backend:
+        condition: service_started

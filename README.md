@@ -4,7 +4,7 @@ Hệ thống truy vấn dữ liệu học vụ theo dạng chat cho NEU, gồm:
 - `frontend` (Nuxt 3): giao diện Admin/User.
 - `backend` (FastAPI): API xác thực, phân quyền, import dữ liệu, truy vấn.
 - `ai_core` (Python): phân loại intent, sinh Cypher, tóm tắt kết quả.
-- `docker-compose.yml`: chạy hạ tầng dữ liệu (PostgreSQL, Neo4j, Redis).
+- `docker-compose.yml`: chạy full stack (PostgreSQL, Neo4j, Redis, Backend, Frontend).
 
 ## Kiến trúc tổng quan
 
@@ -34,12 +34,12 @@ neu_agent/
 
 ## Chạy nhanh (Local Dev)
 
-### 1) Khởi động dịch vụ dữ liệu
+### 1) Khởi động toàn bộ services bằng Docker Compose
 
 Từ thư mục root:
 
 ```bash
-docker compose up -d
+docker compose up -d --build
 ```
 
 Service mặc định:
@@ -47,8 +47,16 @@ Service mặc định:
 - Neo4j HTTP: `localhost:17474`
 - Neo4j Bolt: `localhost:17687`
 - Redis: `localhost:16379`
+- Backend API: `http://localhost:1111`
+- Frontend: `http://localhost:3003`
 
-### 2) Chạy backend (FastAPI)
+Nếu cần truyền biến môi trường cho backend/frontend khi chạy compose:
+
+```bash
+OPENAI_API_KEY=... OPENAI_MODEL=gpt-4o docker compose up -d --build
+```
+
+### 2) Chạy backend/frontend riêng lẻ (tuỳ chọn - local dev)
 
 ```bash
 cd backend
