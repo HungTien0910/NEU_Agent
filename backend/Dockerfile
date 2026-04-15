@@ -12,7 +12,7 @@ COPY backend /app/backend
 COPY ai_core /app/ai_core
 
 WORKDIR /app/backend
-RUN chmod +x /app/backend/start.sh
+RUN sed -i 's/\r$//' /app/backend/start.sh && chmod +x /app/backend/start.sh
 EXPOSE 1111
 
-CMD ["./start.sh"]
+CMD ["sh", "./start.sh"]
