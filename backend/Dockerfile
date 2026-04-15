@@ -12,6 +12,7 @@ COPY backend /app/backend
 COPY ai_core /app/ai_core
 
 WORKDIR /app/backend
+RUN chmod +x /app/backend/start.sh
 EXPOSE 1111
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "1111"]
+CMD ["./start.sh"]
