@@ -5,17 +5,19 @@ services:
     restart: unless-stopped
     ports:
       - "55432:5432"
+    command: ["postgres", "-c", "hba_file=/etc/postgresql/pg_hba.conf", "-c", "listen_addresses=*"]
     environment:
       POSTGRES_DB: neu
       POSTGRES_USER: neu_user
       POSTGRES_PASSWORD: neu_pass
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
+      - ./docker/postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U neu_user -d neu"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 8
 
   neo4j:
     image: neo4j:5.19
@@ -61,6 +63,7 @@ services:
       - "1111:1111"
     environment:
       pg_dsn: postgresql+psycopg2://neu_user:neu_pass@postgres:5432/neu
+      PG_DSN: postgresql+psycopg2://neu_user:neu_pass@postgres:5432/neu
       neo4j_uri: bolt://neo4j:7687
       neo4j_user: neo4j
       neo4j_password: neo4j_pass
