@@ -28,12 +28,51 @@
       </div>
     </div>
 
+    <div class="admin-card" style="margin-top: 16px">
+      <div class="stat-card__label" style="font-weight: 600; color: #1b2b44">
+        Import PDF tuyển sinh
+      </div>
+
+      <div v-if="!pdfFile" class="upload-box" @click="triggerPdfFile">
+        Kéo thả file PDF hoặc bấm để chọn file
+      </div>
+      <div v-else class="admin-toolbar" style="margin-top: 12px; align-items: center">
+        <ul class="file-info" style="margin-top: 0">
+          <li><strong>Tên file:</strong> {{ pdfFile.name }}</li>
+          <li><strong>Dung lượng:</strong> {{ pdfFileSize }}</li>
+        </ul>
+        <BaseButton variant="outline" @click="triggerPdfFile">
+          Đổi file
+        </BaseButton>
+      </div>
+
+      <div class="admin-footer-actions" style="margin-top: 12px; justify-content: flex-start">
+        <BaseButton :disabled="!pdfFile || pdfLoading" @click="importPdfNow">
+          {{ pdfLoading ? 'Đang OCR & import...' : 'Import PDF' }}
+        </BaseButton>
+      </div>
+      <p v-if="pdfLoading" class="pdf-progress">
+        {{ pdfProgressStep }} ({{ pdfProgress }}%)
+      </p>
+
+      <p v-if="pdfImportMessage" :class="pdfImportOk ? 'import-success' : 'import-error'">
+        {{ pdfImportMessage }}
+      </p>
+    </div>
+
     <input
       ref="fileInput"
       class="hidden-input"
       type="file"
       accept=".xlsx,.xls"
       @change="onFileChange"
+    />
+    <input
+      ref="pdfInput"
+      class="hidden-input"
+      type="file"
+      accept=".pdf"
+      @change="onPdfChange"
     />
 
     <div v-if="file" class="admin-card">
@@ -83,7 +122,7 @@
 </template>
 
 <script setup lang="ts">
-import { previewData } from '@/services/api/admin';
+import { getImportProgress, importAdmissionPdf, previewData } from '@/services/api/admin';
 import { useImportState } from '@/composables/useImportState';
 import { useI18n } from '@/composables/useI18n';
 
@@ -134,6 +173,18 @@ const previewColumnDefs = computed(() =>
   }))
 );
 const fileInput = ref<HTMLInputElement | null>(null);
+const pdfInput = ref<HTMLInputElement | null>(null);
+const pdfFile = ref<File | null>(null);
+const pdfImportMessage = ref('');
+const pdfImportOk = ref(false);
+const pdfLoading = ref(false);
+const pdfProgress = ref(0);
+const pdfProgressStep = ref('');
+const pdfJobId = ref<string | null>(null);
+let pdfTimer: ReturnType<typeof setTimeout> | null = null;
+const pdfFileSize = computed(() =>
+  pdfFile.value ? `${(pdfFile.value.size / (1024 * 1024)).toFixed(1)} MB` : '0 MB'
+);
 
 const fileInfo = computed(() => {
   if (!file.value || !preview.value) {
@@ -150,6 +201,10 @@ const fileInfo = computed(() => {
 
 const triggerFile = () => {
   fileInput.value?.click();
+};
+
+const triggerPdfFile = () => {
+  pdfInput.value?.click();
 };
 
 const loadSheet = async (sheet: string) => {
@@ -181,8 +236,71 @@ const onFileChange = async (event: Event) => {
   }
 };
 
+const onPdfChange = async (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  if (!target.files || !target.files[0]) return;
+  pdfFile.value = target.files[0];
+  pdfImportMessage.value = '';
+  target.value = '';
+};
+
+const importPdfNow = async () => {
+  if (!pdfFile.value || pdfLoading.value) return;
+  pdfLoading.value = true;
+  pdfProgress.value = 0;
+  pdfProgressStep.value = 'Đang bắt đầu import PDF...';
+  pdfImportMessage.value = '';
+  try {
+    const result: any = await importAdmissionPdf(pdfFile.value);
+    pdfJobId.value = result.job_id;
+    stopPdfPolling();
+    pollPdfProgress();
+  } catch (error: any) {
+    pdfImportOk.value = false;
+    pdfImportMessage.value = error?.data?.detail || 'Import PDF thất bại.';
+    pdfLoading.value = false;
+  }
+};
+
+const stopPdfPolling = () => {
+  if (pdfTimer) {
+    clearTimeout(pdfTimer);
+    pdfTimer = null;
+  }
+};
+
+const pollPdfProgress = async () => {
+  if (!pdfJobId.value) return;
+  try {
+    const data: any = await getImportProgress(pdfJobId.value);
+    pdfProgress.value = data.percent || 0;
+    pdfProgressStep.value = data.step || '';
+    if (data.status === 'done') {
+      pdfImportOk.value = true;
+      pdfImportMessage.value = 'Import PDF hoàn tất.';
+      pdfLoading.value = false;
+      stopPdfPolling();
+      return;
+    }
+    if (data.status === 'error') {
+      pdfImportOk.value = false;
+      pdfImportMessage.value = data.error || 'Import PDF thất bại.';
+      pdfLoading.value = false;
+      stopPdfPolling();
+      return;
+    }
+  } catch {
+    // keep polling
+  }
+  pdfTimer = setTimeout(pollPdfProgress, 1000);
+};
+
 const goValidate = () => navigateTo('/admin/import/validate');
 const goDetail = () => navigateTo('/admin/import/detail');
+
+onBeforeUnmount(() => {
+  stopPdfPolling();
+});
 </script>
 
 <style scoped>
@@ -222,5 +340,17 @@ const goDetail = () => navigateTo('/admin/import/detail');
   margin: 12px 0 0;
   font-size: 13px;
   color: var(--color-danger);
+}
+
+.import-success {
+  margin: 12px 0 0;
+  font-size: 13px;
+  color: #1f6e40;
+}
+
+.pdf-progress {
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: #4a5c7a;
 }
 </style>

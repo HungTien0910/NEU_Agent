@@ -182,6 +182,13 @@ export const importData = async (file: File) => {
   return await api('/data/import', { method: 'POST', body: form });
 };
 
+export const importAdmissionPdf = async (file: File) => {
+  const api = useApiFetch();
+  const form = new FormData();
+  form.append('file', file);
+  return await api('/data/import-pdf', { method: 'POST', body: form });
+};
+
 export const getImportProgress = async (jobId: string) => {
   const api = useApiFetch();
   return await api('/data/import/progress', { params: { job_id: jobId } });

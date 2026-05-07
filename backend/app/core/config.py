@@ -1,4 +1,5 @@
 from pydantic import BaseSettings
+from pathlib import Path
 
 
 class Settings(BaseSettings):
@@ -13,6 +14,14 @@ class Settings(BaseSettings):
     # OpenAI
     openai_api_key: str = ""
     openai_model: str = "gpt-4o"
+    openai_ocr_model: str = "gpt-4o"
+    openai_embedding_model: str = "text-embedding-3-small"
+    openai_embedding_dimensions: int = 1536
+    admission_chunk_words: int = 180
+    admission_chunk_overlap_words: int = 40
+    admission_embedding_batch_size: int = 32
+    admission_hybrid_weight_text: float = 0.5
+    admission_hybrid_weight_vector: float = 0.5
 
     # Redis
     redis_url: str = "redis://localhost:6379/0"

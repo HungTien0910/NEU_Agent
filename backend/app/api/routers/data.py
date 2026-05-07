@@ -23,6 +23,7 @@ from app.services.data_service import (
     validate_structure,
     validate_excel,
 )
+from app.services.admission_service import run_import_admission_pdf_job
 from app.services.import_progress import get_progress, set_progress
 
 router = APIRouter(prefix="/data", tags=["data"])
@@ -72,6 +73,19 @@ async def import_data(
     set_progress(job_id, "running", 0, "Đang chuẩn bị import")
     background_tasks.add_task(run_import_job, job_id, content)
     return {"job_id": job_id, "message": "Import started."}
+
+
+@router.post("/import-pdf")
+async def import_pdf(background_tasks: BackgroundTasks, file: UploadFile = File(...)):
+    if not file.filename or not file.filename.lower().endswith(".pdf"):
+        raise HTTPException(status_code=400, detail="Chỉ hỗ trợ file PDF.")
+    content = await file.read()
+    if not content:
+        raise HTTPException(status_code=400, detail="File rỗng.")
+    job_id = str(uuid.uuid4())
+    set_progress(job_id, "running", 0, "Đang chuẩn bị import PDF")
+    background_tasks.add_task(run_import_admission_pdf_job, job_id, file.filename, content)
+    return {"job_id": job_id, "message": "PDF import started."}
 
 
 @router.get("/import/progress")

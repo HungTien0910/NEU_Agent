@@ -2,7 +2,18 @@ import logging
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.routers import admin, auth, data, export, history, logs, query, settings, users
+from app.api.routers import (
+    admin,
+    auth,
+    data,
+    export,
+    history,
+    logs,
+    public_admission,
+    query,
+    settings,
+    users,
+)
 from app.db.base import Base
 from app.db.migrations import ensure_user_columns
 from app.db.postgres import engine
@@ -50,3 +61,4 @@ app.include_router(data.router)
 app.include_router(query.router)
 app.include_router(history.router)
 app.include_router(export.router)
+app.include_router(public_admission.router)

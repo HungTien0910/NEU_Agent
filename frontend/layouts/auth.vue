@@ -13,6 +13,7 @@
     <main class="auth-layout__content">
       <slot />
     </main>
+    <AdmissionChatWidget />
   </div>
 </template>
 
